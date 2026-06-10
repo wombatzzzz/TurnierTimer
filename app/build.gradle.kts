@@ -34,7 +34,7 @@ android {
 
 }
 
-android.sourceSets.getByName("main").java.filter.exclude("com/ultiorga/turniertimer/.claude/**")
+(android.sourceSets.getByName("main").java as org.gradle.api.tasks.util.PatternFilterable).exclude("com/ultiorga/turniertimer/.claude/**")
 
 dependencies {
     implementation(libs.androidx.activity.ktx)
