@@ -36,9 +36,10 @@ class EinstellungenActivity : AppCompatActivity() {
     }
 
     private val startJinglePicker = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
+            contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             uriStartJingle = it
             val intSecDauer = getAudioDauer(it)
             findViewById<Button>(R.id.btnStartJingle).text = "✅ Start-Jingle gewählt (${intSecDauer}s)"
@@ -48,7 +49,7 @@ class EinstellungenActivity : AppCompatActivity() {
     }
 
     private val letzteMinJinglePicker = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
             val intSecDauer = getAudioDauer(it)
@@ -64,6 +65,7 @@ class EinstellungenActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
+                contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 uriLetzteMinJingle = it
                 findViewById<Button>(R.id.btnLetzteMinJingle).text =
                     "✅ Letzte-x-Minuten-Jingle gewählt (${intSecDauer}s)"
@@ -74,7 +76,7 @@ class EinstellungenActivity : AppCompatActivity() {
     }
 
     private val schlussJinglePicker = registerForActivityResult(
-        ActivityResultContracts.GetContent()
+        ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
             val intSecDauer = getAudioDauer(it)
@@ -90,6 +92,7 @@ class EinstellungenActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             } else {
+                contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 uriSchlussJingle = it
                 findViewById<Button>(R.id.btnSchlussJingle).text =
                     "✅ Schluss-Jingle gewählt (${intSecDauer}s)"
@@ -160,13 +163,13 @@ class EinstellungenActivity : AppCompatActivity() {
 
     private fun setupJingleButtons() {
         findViewById<Button>(R.id.btnStartJingle).setOnClickListener {
-            startJinglePicker.launch("audio/*")
+            startJinglePicker.launch(arrayOf("audio/*"))
         }
         findViewById<Button>(R.id.btnLetzteMinJingle).setOnClickListener {
-            letzteMinJinglePicker.launch("audio/*")
+            letzteMinJinglePicker.launch(arrayOf("audio/*"))
         }
         findViewById<Button>(R.id.btnSchlussJingle).setOnClickListener {
-            schlussJinglePicker.launch("audio/*")
+            schlussJinglePicker.launch(arrayOf("audio/*"))
         }
     }
 

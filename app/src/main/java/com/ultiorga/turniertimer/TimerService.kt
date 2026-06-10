@@ -486,15 +486,7 @@ class TimerService : Service() {
                             .build()
                     )
 
-                    // Datei über FileDescriptor öffnen (funktioniert mit allen URI-Typen)
-                    val parcelFd = applicationContext.contentResolver.openFileDescriptor(uri, "r")
-                    if (parcelFd == null) {
-                        Log.e("TurnierTimer", "Datei konnte nicht geöffnet werden: $uri")
-                        spotifyFortsetzten()
-                        return
-                    }
-                    setDataSource(parcelFd.fileDescriptor)
-                    parcelFd.close()
+                    setDataSource(applicationContext, uri)
 
                     prepare()
                     start()
