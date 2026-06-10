@@ -29,8 +29,8 @@ class MainActivity : AppCompatActivity() {
     /** URI der gewählten Start-Jingle Audiodatei (null = noch nicht gewählt) */
     private var uriStartJingle: Uri? = null
 
-    /** URI der gewählten End-Jingle Audiodatei (null = noch nicht gewählt) */
-    private var uriEndJingle: Uri? = null
+    /** URI der gewählten Letzte-x-Minuten-Jingle Audiodatei (null = noch nicht gewählt) */
+    private var uriLetzteMinJingle: Uri? = null
 
     /** URI der gewählten Schluss-Jingle Audiodatei (null = noch nicht gewählt) */
     private var uriSchlussJingle: Uri? = null
@@ -44,8 +44,8 @@ class MainActivity : AppCompatActivity() {
     /** Aktuelle Start-Jingle Lautstärke als Wert zwischen 0.0 und 1.0 */
     private var floatVolLautstaerke: Float = 0.8f
 
-    /** Separate End-Jingle Lautstärke als Wert zwischen 0.0 und 1.0 */
-    private var floatVolEndJingle: Float = 0.8f
+    /** Separate Letzte-x-Minuten-Jingle Lautstärke als Wert zwischen 0.0 und 1.0 */
+    private var floatVolLetzteMinJingle: Float = 0.8f
 
     /** Separate Schluss-Jingle Lautstärke als Wert zwischen 0.0 und 1.0 */
     private var floatVolSchlussJingle: Float = 0.8f
@@ -79,14 +79,14 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val stringSpielNr = intent?.getStringExtra(TimerService.EXTRA_SPIEL_NR) ?: return
             val stringNaechstes = intent.getStringExtra(TimerService.EXTRA_NAECHSTES) ?: ""
-            val stringEndJingleInfo = intent.getStringExtra(TimerService.EXTRA_END_JINGLE) ?: ""
+            val stringLetzteMinJingleInfo = intent.getStringExtra(TimerService.EXTRA_LETZTE_MIN_JINGLE) ?: ""
             val boolTimerLaeuft = intent.getBooleanExtra(TimerService.EXTRA_TIMER_LAEUFT, false)
 
             val stringSchlussJingleInfo = intent.getStringExtra(TimerService.EXTRA_SCHLUSS_JINGLE) ?: ""
             runOnUiThread {
                 findViewById<TextView>(R.id.tvSpielInfo).text = stringSpielNr
                 findViewById<TextView>(R.id.tvNaechstesSpiel).text = stringNaechstes
-                findViewById<TextView>(R.id.tvEndJingleInfo).text = stringEndJingleInfo
+                findViewById<TextView>(R.id.tvLetzteMinJingleInfo).text = stringLetzteMinJingleInfo
                 findViewById<TextView>(R.id.tvSchlussJingleInfo).text = stringSchlussJingleInfo
                 // Buttons sperren/freigeben je nach Timer-Status
                 setJingleButtonsEnabled(!boolTimerLaeuft)
@@ -138,10 +138,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Öffnet den Datei-Picker für den End-Jingle.
-     * Prüft ob die Audiodatei kürzer ist als die verbleibende Spielzeit nach dem End-Jingle.
+     * Öffnet den Datei-Picker für den Letzte-x-Minuten-Jingle.
+     * Prüft ob die Audiodatei kürzer ist als die verbleibende Spielzeit nach dem Letzte-x-Minuten-Jingle.
      */
-    private val endJinglePicker = registerForActivityResult(
+    private val letzteMinJinglePicker = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
         uri?.let {
@@ -149,20 +149,20 @@ class MainActivity : AppCompatActivity() {
 
             // Maximale Jingle-Dauer = Zeitslot minus End-Minuten (verbleibende Zeit bis Spielende)
             val intMinZeitSlot = findViewById<EditText>(R.id.etZeitslot).text.toString().toIntOrNull()
-            val intMinEnd = findViewById<EditText>(R.id.etEndMinuten).text.toString().toIntOrNull()
-            val intSecMaxDauer = if (intMinZeitSlot != null && intMinEnd != null) (intMinZeitSlot - intMinEnd) * 60 else Int.MAX_VALUE
+            val intMinLetzteMin = findViewById<EditText>(R.id.etLetzteMinMinuten).text.toString().toIntOrNull()
+            val intSecMaxDauer = if (intMinZeitSlot != null && intMinLetzteMin != null) (intMinZeitSlot - intMinLetzteMin) * 60 else Int.MAX_VALUE
 
             if (intSecDauer > 0 && intSecDauer > intSecMaxDauer) {
                 // Datei zu lang – ablehnen und Nutzer informieren
                 Toast.makeText(
                     this,
-                    "⚠️ End-Jingle zu lang! Max. ${intSecMaxDauer}s, Datei: ${intSecDauer}s",
+                    "⚠️ Letzte-x-Minuten-Jingle zu lang! Max. ${intSecMaxDauer}s, Datei: ${intSecDauer}s",
                     Toast.LENGTH_LONG
                 ).show()
             } else {
                 // Datei akzeptieren
-                uriEndJingle = it
-                findViewById<Button>(R.id.btnEndJingle).text = "✅ End-Jingle gewählt (${intSecDauer}s)"
+                uriLetzteMinJingle = it
+                findViewById<Button>(R.id.btnLetzteMinJingle).text = "✅ Letzte-x-Minuten-Jingle gewählt (${intSecDauer}s)"
             }
         }
     }
@@ -194,10 +194,10 @@ class MainActivity : AppCompatActivity() {
     private fun setJingleButtonsEnabled(enabled: Boolean) {
         listOf(
             R.id.btnStartJingle,
-            R.id.btnEndJingle,
+            R.id.btnLetzteMinJingle,
             R.id.btnSchlussJingle,
             R.id.btnTestStartJingle,
-            R.id.btnTestEndJingle,
+            R.id.btnTestLetzteMinJingle,
             R.id.btnTestSchlussJingle
         ).forEach { id ->
             findViewById<Button>(id).isEnabled = enabled
@@ -237,13 +237,13 @@ class MainActivity : AppCompatActivity() {
         prefsEditor.putInt("PREF_HOUR_START", intHourStart)
         prefsEditor.putInt("PREF_MIN_START", intMinStart)
         prefsEditor.putString("PREF_ZEITSLOT", findViewById<EditText>(R.id.etZeitslot).text.toString())
-        prefsEditor.putString("PREF_END_MIN", findViewById<EditText>(R.id.etEndMinuten).text.toString())
+        prefsEditor.putString("PREF_END_MIN", findViewById<EditText>(R.id.etLetzteMinMinuten).text.toString())
         prefsEditor.putString("PREF_SCHLUSS_MIN", findViewById<EditText>(R.id.etSchlussMinuten).text.toString())
         prefsEditor.putString("PREF_URI_START_JINGLE", uriStartJingle?.toString() ?: "")
-        prefsEditor.putString("PREF_URI_END_JINGLE", uriEndJingle?.toString() ?: "")
+        prefsEditor.putString("PREF_URI_END_JINGLE", uriLetzteMinJingle?.toString() ?: "")
         prefsEditor.putString("PREF_URI_SCHLUSS_JINGLE", uriSchlussJingle?.toString() ?: "")
         prefsEditor.putFloat("PREF_VOL", floatVolLautstaerke)
-        prefsEditor.putFloat("PREF_VOL_END", floatVolEndJingle)
+        prefsEditor.putFloat("PREF_VOL_END", floatVolLetzteMinJingle)
         prefsEditor.putFloat("PREF_VOL_SCHLUSS", floatVolSchlussJingle)
         prefsEditor.apply()
         Toast.makeText(this, "✅ Einstellungen gespeichert!", Toast.LENGTH_SHORT).show()
@@ -273,7 +273,7 @@ class MainActivity : AppCompatActivity() {
             findViewById<EditText>(R.id.etZeitslot).setText(stringZeitslot)
         }
         if (!stringEndMin.isNullOrEmpty()) {
-            findViewById<EditText>(R.id.etEndMinuten).setText(stringEndMin)
+            findViewById<EditText>(R.id.etLetzteMinMinuten).setText(stringEndMin)
         }
         if (!stringSchlussMin.isNullOrEmpty()) {
             findViewById<EditText>(R.id.etSchlussMinuten).setText(stringSchlussMin)
@@ -289,9 +289,9 @@ class MainActivity : AppCompatActivity() {
             findViewById<Button>(R.id.btnStartJingle).text = "✅ Start-Jingle gewählt (${intSecDauer}s)"
         }
         if (!stringUriEnd.isNullOrEmpty()) {
-            uriEndJingle = Uri.parse(stringUriEnd)
-            val intSecDauer = getAudioDauer(uriEndJingle!!)
-            findViewById<Button>(R.id.btnEndJingle).text = "✅ End-Jingle gewählt (${intSecDauer}s)"
+            uriLetzteMinJingle = Uri.parse(stringUriEnd)
+            val intSecDauer = getAudioDauer(uriLetzteMinJingle!!)
+            findViewById<Button>(R.id.btnLetzteMinJingle).text = "✅ Letzte-x-Minuten-Jingle gewählt (${intSecDauer}s)"
         }
         if (!stringUriSchluss.isNullOrEmpty()) {
             uriSchlussJingle = Uri.parse(stringUriSchluss)
@@ -309,12 +309,12 @@ class MainActivity : AppCompatActivity() {
         findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerke).progress = intVolAkt
         findViewById<TextView>(R.id.textViewLautstaerke).text = "Lautstärke Start-Jingle: $intVolAkt / $intVolMax"
 
-        // End-Jingle Lautstärke laden
+        // Letzte-x-Minuten-Jingle Lautstärke laden
         val floatVolEndGespeichert = prefs.getFloat("PREF_VOL_END", 0.8f)
-        floatVolEndJingle = floatVolEndGespeichert
+        floatVolLetzteMinJingle = floatVolEndGespeichert
         val intVolEndAkt = (floatVolEndGespeichert * intVolMax).toInt()
-        findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerkeEnd).progress = intVolEndAkt
-        findViewById<TextView>(R.id.textViewLautstaerkeEnd).text = "Lautstärke End-Jingle: $intVolEndAkt / $intVolMax"
+        findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerkeLetzteMin).progress = intVolEndAkt
+        findViewById<TextView>(R.id.textViewLautstaerkeLetzteMin).text = "Lautstärke Letzte-x-Minuten-Jingle: $intVolEndAkt / $intVolMax"
 
         // Schluss-Jingle Lautstärke laden
         val floatVolSchlussGespeichert = prefs.getFloat("PREF_VOL_SCHLUSS", 0.8f)
@@ -371,8 +371,8 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnStartJingle).setOnClickListener {
             startJinglePicker.launch("audio/*")
         }
-        findViewById<Button>(R.id.btnEndJingle).setOnClickListener {
-            endJinglePicker.launch("audio/*")
+        findViewById<Button>(R.id.btnLetzteMinJingle).setOnClickListener {
+            letzteMinJinglePicker.launch("audio/*")
         }
         findViewById<Button>(R.id.btnSchlussJingle).setOnClickListener {
             schlussJinglePicker.launch("audio/*")
@@ -393,12 +393,12 @@ class MainActivity : AppCompatActivity() {
             testJingleViaService(uriStartJingle!!, it as Button, jingleTyp = JingleTyp.START)
         }
 
-        findViewById<Button>(R.id.btnTestEndJingle).setOnClickListener {
-            if (uriEndJingle == null) {
-                Toast.makeText(this, "Bitte zuerst End-Jingle auswählen!", Toast.LENGTH_SHORT).show()
+        findViewById<Button>(R.id.btnTestLetzteMinJingle).setOnClickListener {
+            if (uriLetzteMinJingle == null) {
+                Toast.makeText(this, "Bitte zuerst Letzte-x-Minuten-Jingle auswählen!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            testJingleViaService(uriEndJingle!!, it as Button, jingleTyp = JingleTyp.END)
+            testJingleViaService(uriLetzteMinJingle!!, it as Button, jingleTyp = JingleTyp.END)
         }
 
         findViewById<Button>(R.id.btnTestSchlussJingle).setOnClickListener {
@@ -411,9 +411,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Richtet beide Lautstärke-Regler ein (Start-Jingle und End-Jingle).
+     * Richtet beide Lautstärke-Regler ein (Start-Jingle und Letzte-x-Minuten-Jingle).
      * Der Start-Regler steuert auch den System-Stream-Pegel.
-     * Der End-Regler steuert nur den Software-Gain des End-Jingle-Players.
+     * Der End-Regler steuert nur den Software-Gain des Letzte-x-Minuten-Jingle-Players.
      */
     private fun setupLautstaerkeRegler() {
         val audioManagerSystem = getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -444,23 +444,23 @@ class MainActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
 
-        // ── End-Jingle Slider ────────────────────────────────────────────────────
-        val seekBarEnd = findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerkeEnd)
-        val tvLautstaerkeEnd = findViewById<TextView>(R.id.textViewLautstaerkeEnd)
-        val intVolEndAkt = (floatVolEndJingle * intVolMax).toInt()
+        // ── Letzte-x-Minuten-Jingle Slider ────────────────────────────────────────────────────
+        val seekBarEnd = findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerkeLetzteMin)
+        val tvLautstaerkeEnd = findViewById<TextView>(R.id.textViewLautstaerkeLetzteMin)
+        val intVolEndAkt = (floatVolLetzteMinJingle * intVolMax).toInt()
 
         seekBarEnd.max = intVolMax
         seekBarEnd.progress = intVolEndAkt
-        tvLautstaerkeEnd.text = "Lautstärke End-Jingle: $intVolEndAkt / $intVolMax"
+        tvLautstaerkeEnd.text = "Lautstärke Letzte-x-Minuten-Jingle: $intVolEndAkt / $intVolMax"
 
         seekBarEnd.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, intProgress: Int, boolFromUser: Boolean) {
-                tvLautstaerkeEnd.text = "Lautstärke End-Jingle: $intProgress / $intVolMax"
-                floatVolEndJingle = intProgress / intVolMax.toFloat()
+                tvLautstaerkeEnd.text = "Lautstärke Letzte-x-Minuten-Jingle: $intProgress / $intVolMax"
+                floatVolLetzteMinJingle = intProgress / intVolMax.toFloat()
 
                 val intentEndVol = Intent(this@MainActivity, TimerService::class.java).apply {
-                    action = TimerService.ACTION_LAUTSTAERKE_END
-                    putExtra(TimerService.EXTRA_LAUTSTAERKE_END_WERT, floatVolEndJingle)
+                    action = TimerService.ACTION_LAUTSTAERKE_LETZTE_MIN
+                    putExtra(TimerService.EXTRA_LAUTSTAERKE_LETZTE_MIN_WERT, floatVolLetzteMinJingle)
                 }
                 startService(intentEndVol)
             }
@@ -500,7 +500,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupStartStopButtons() {
         findViewById<Button>(R.id.btnStart).setOnClickListener {
             val intMinZeitSlot = findViewById<EditText>(R.id.etZeitslot).text.toString().toIntOrNull()
-            val intMinEnd = findViewById<EditText>(R.id.etEndMinuten).text.toString().toIntOrNull()
+            val intMinLetzteMin = findViewById<EditText>(R.id.etLetzteMinMinuten).text.toString().toIntOrNull()
             val intMinSchluss = findViewById<EditText>(R.id.etSchlussMinuten).text.toString().toIntOrNull()
 
             when {
@@ -510,10 +510,10 @@ class MainActivity : AppCompatActivity() {
                 intMinZeitSlot == null || intMinZeitSlot <= 0 ->
                     Toast.makeText(this, "Bitte gültigen Zeitslot eingeben!", Toast.LENGTH_SHORT).show()
 
-                intMinEnd == null || intMinEnd <= 0 ->
+                intMinLetzteMin == null || intMinLetzteMin <= 0 ->
                     Toast.makeText(this, "Bitte End-Minuten eingeben!", Toast.LENGTH_SHORT).show()
 
-                intMinEnd >= intMinZeitSlot ->
+                intMinLetzteMin >= intMinZeitSlot ->
                     Toast.makeText(this, "End-Minuten müssen kleiner als Zeitslot sein!", Toast.LENGTH_SHORT).show()
 
                 intMinSchluss == null || intMinSchluss <= 0 ->
@@ -522,21 +522,21 @@ class MainActivity : AppCompatActivity() {
                 intMinSchluss >= intMinZeitSlot ->
                     Toast.makeText(this, "Schluss-Minuten müssen kleiner als Zeitslot sein!", Toast.LENGTH_SHORT).show()
 
-                intMinSchluss <= intMinEnd ->
+                intMinSchluss <= intMinLetzteMin ->
                     Toast.makeText(this, "Schluss-Minuten müssen größer als End-Minuten sein!", Toast.LENGTH_SHORT).show()
 
                 uriStartJingle == null ->
                     Toast.makeText(this, "Bitte Start-Jingle auswählen!", Toast.LENGTH_SHORT).show()
 
-                uriEndJingle == null ->
-                    Toast.makeText(this, "Bitte End-Jingle auswählen!", Toast.LENGTH_SHORT).show()
+                uriLetzteMinJingle == null ->
+                    Toast.makeText(this, "Bitte Letzte-x-Minuten-Jingle auswählen!", Toast.LENGTH_SHORT).show()
 
                 uriSchlussJingle == null ->
                     Toast.makeText(this, "Bitte Schluss-Jingle auswählen!", Toast.LENGTH_SHORT).show()
 
                 else -> {
-                    val intSecMaxEndDauer = (intMinZeitSlot - intMinEnd) * 60
-                    val intSecEndDauer = getAudioDauer(uriEndJingle!!)
+                    val intSecMaxEndDauer = (intMinZeitSlot - intMinLetzteMin) * 60
+                    val intSecEndDauer = getAudioDauer(uriLetzteMinJingle!!)
                     val intSecMaxSchlussDauer = (intMinZeitSlot - intMinSchluss) * 60
                     val intSecSchlussDauer = getAudioDauer(uriSchlussJingle!!)
 
@@ -544,7 +544,7 @@ class MainActivity : AppCompatActivity() {
                         intSecEndDauer > 0 && intSecEndDauer > intSecMaxEndDauer ->
                             Toast.makeText(
                                 this,
-                                "⚠️ End-Jingle zu lang! Max. ${intSecMaxEndDauer}s, Datei: ${intSecEndDauer}s",
+                                "⚠️ Letzte-x-Minuten-Jingle zu lang! Max. ${intSecMaxEndDauer}s, Datei: ${intSecEndDauer}s",
                                 Toast.LENGTH_LONG
                             ).show()
                         intSecSchlussDauer > 0 && intSecSchlussDauer > intSecMaxSchlussDauer ->
@@ -553,7 +553,7 @@ class MainActivity : AppCompatActivity() {
                                 "⚠️ Schluss-Jingle zu lang! Max. ${intSecMaxSchlussDauer}s, Datei: ${intSecSchlussDauer}s",
                                 Toast.LENGTH_LONG
                             ).show()
-                        else -> starteService(intMinZeitSlot, intMinEnd, intMinSchluss)
+                        else -> starteService(intMinZeitSlot, intMinLetzteMin, intMinSchluss)
                     }
                 }
             }
@@ -565,7 +565,7 @@ class MainActivity : AppCompatActivity() {
             findViewById<TextView>(R.id.tvStatus).text = "⏹ Timer gestoppt"
             findViewById<TextView>(R.id.tvSpielInfo).text = ""
             findViewById<TextView>(R.id.tvNaechstesSpiel).text = ""
-            findViewById<TextView>(R.id.tvEndJingleInfo).text = ""
+            findViewById<TextView>(R.id.tvLetzteMinJingleInfo).text = ""
             findViewById<TextView>(R.id.tvSchlussJingleInfo).text = ""
             setJingleButtonsEnabled(true)
         }
@@ -579,18 +579,18 @@ class MainActivity : AppCompatActivity() {
     /**
      * Startet den TimerService mit allen nötigen Parametern.
      */
-    private fun starteService(intMinZeitSlot: Int, intMinEnd: Int, intMinSchluss: Int) {
+    private fun starteService(intMinZeitSlot: Int, intMinLetzteMin: Int, intMinSchluss: Int) {
         val intentService = Intent(this, TimerService::class.java).apply {
             putExtra("START_STUNDE", intHourStart)
             putExtra("START_MINUTE", intMinStart)
             putExtra("ZEITSLOT", intMinZeitSlot)
-            putExtra("END_MINUTEN", intMinEnd)
+            putExtra("LETZTE_MIN_MINUTEN", intMinLetzteMin)
             putExtra("SCHLUSS_MINUTEN", intMinSchluss)
             putExtra("START_JINGLE", uriStartJingle.toString())
-            putExtra("END_JINGLE", uriEndJingle.toString())
+            putExtra("LETZTE_MIN_JINGLE", uriLetzteMinJingle.toString())
             putExtra("SCHLUSS_JINGLE", uriSchlussJingle.toString())
             putExtra("LAUTSTAERKE", floatVolLautstaerke)
-            putExtra("LAUTSTAERKE_END", floatVolEndJingle)
+            putExtra("LAUTSTAERKE_LETZTE_MIN", floatVolLetzteMinJingle)
             putExtra("LAUTSTAERKE_SCHLUSS", floatVolSchlussJingle)
         }
         startForegroundService(intentService)
@@ -684,7 +684,7 @@ class MainActivity : AppCompatActivity() {
         runOnUiThread {
             buttonTest.text = when (buttonTest.id) {
                 R.id.btnTestStartJingle -> "▶ Start-Jingle testen"
-                R.id.btnTestEndJingle -> "▶ End-Jingle testen"
+                R.id.btnTestLetzteMinJingle -> "▶ Letzte-x-Minuten-Jingle testen"
                 else -> "▶ Schluss-Jingle testen"
             }
             buttonTest.backgroundTintList = android.content.res.ColorStateList.valueOf(

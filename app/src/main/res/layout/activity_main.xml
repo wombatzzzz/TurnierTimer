@@ -53,14 +53,14 @@
             android:inputType="number"
             android:text="30" />
 
-        <!-- End-Jingle nach X Minuten -->
+        <!-- Letzte-x-Minuten-Jingle nach X Minuten -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="End-Jingle spielen nach wie vielen Minuten?" />
+            android:text="Letzte-x-Minuten-Jingle spielen nach wie vielen Minuten?" />
 
         <EditText
-            android:id="@+id/etEndMinuten"
+            android:id="@+id/etLetzteMinMinuten"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="z.B. 12"
@@ -93,17 +93,17 @@
             android:layout_height="wrap_content"
             android:text="🎵 Start-Jingle auswählen" />
 
-        <!-- End-Jingle -->
+        <!-- Letzte-x-Minuten-Jingle -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="End-Jingle (vom Handy):" />
+            android:text="Letzte-x-Minuten-Jingle (vom Handy):" />
 
         <Button
-            android:id="@+id/btnEndJingle"
+            android:id="@+id/btnLetzteMinJingle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="🎵 End-Jingle auswählen" />
+            android:text="🎵 Letzte-x-Minuten-Jingle auswählen" />
 
         <!-- Schluss-Jingle -->
         <TextView
@@ -127,11 +127,11 @@
             android:textColor="#FFFFFF" />
 
         <Button
-            android:id="@+id/btnTestEndJingle"
+            android:id="@+id/btnTestLetzteMinJingle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:backgroundTint="#2196F3"
-            android:text="▶ End-Jingle testen"
+            android:text="▶ Letzte-x-Minuten-Jingle testen"
             android:textColor="#FFFFFF" />
 
         <Button
@@ -154,15 +154,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- End-Jingle Lautstärke -->
+        <!-- Letzte-x-Minuten-Jingle Lautstärke -->
         <TextView
-            android:id="@+id/textViewLautstaerkeEnd"
+            android:id="@+id/textViewLautstaerkeLetzteMin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Lautstärke End-Jingle: -- / --" />
+            android:text="Lautstärke Letzte-x-Minuten-Jingle: -- / --" />
 
         <SeekBar
-            android:id="@+id/seekBarLautstaerkeEnd"
+            android:id="@+id/seekBarLautstaerkeLetzteMin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -241,7 +241,7 @@
             android:textSize="15sp" />
 
         <TextView
-            android:id="@+id/tvEndJingleInfo"
+            android:id="@+id/tvLetzteMinJingleInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
