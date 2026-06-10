@@ -338,9 +338,9 @@ class TimerService : Service() {
                     val schlussJingleMs2 = ersterStart.timeInMillis + (aktuellesSpiel - 1) * longMsZeitslot + longMsSchluss
                     val schlussJingleUhrzeit2 = kalenderZuUhrzeit(schlussJingleMs2)
 
-                    aktualisiereNotification("🎮 Spiel $aktuellesSpiel läuft – endet um $naechsteUhrzeit Uhr")
+                    aktualisiereNotification("🟢 Spiel $aktuellesSpiel läuft – endet um $naechsteUhrzeit Uhr")
                     sendeUpdate(
-                        stringSpielNr = "🎮 Spiel $aktuellesSpiel um $aktuellesUhrzeit Uhr gestartet!",
+                        stringSpielNr = "🟢 Spiel $aktuellesSpiel um $aktuellesUhrzeit Uhr gestartet!",
                         stringNaechstes = "🕐 Nächstes Spiel um $naechsteUhrzeit Uhr",
                         stringLetzteMinJingleInfo = "⏰ Letzte-x-Minuten-Jingle um $letzteMinJingleUhrzeit Uhr",
                         stringSchlussJingleInfo = "🏁 Schluss-Jingle um $schlussJingleUhrzeit2 Uhr"
@@ -450,12 +450,12 @@ class TimerService : Service() {
             val notifText = if (jetztMs < longMsErsterStart) {
                 "⏳ Spiel 1 startet um ${kalenderZuUhrzeit(longMsErsterStart)} Uhr"
             } else {
-                "🎮 Spiel $aktuellesSpiel läuft – endet um ${kalenderZuUhrzeit(naechsterStartMs)} Uhr"
+                "🟢 Spiel $aktuellesSpiel läuft – endet um ${kalenderZuUhrzeit(naechsterStartMs)} Uhr"
             }
             aktualisiereNotification(notifText)
 
             sendeUpdate(
-                stringSpielNr = "🎮 Aktuelles Spiel: $aktuellesSpiel",
+                stringSpielNr = "🟢 Aktuelles Spiel: $aktuellesSpiel",
                 stringNaechstes = "🕐 Nächster Start-Jingle: ${kalenderZuUhrzeit(naechsterStartMs)} Uhr",
                 stringLetzteMinJingleInfo = "⏰ Letzte-x-Minuten-Jingle um ${kalenderZuUhrzeit(anzeigenLetzteMinJingleMs)} Uhr",
                 stringSchlussJingleInfo = "🏁 Schluss-Jingle um ${kalenderZuUhrzeit(anzeigenSchlussJingleMs)} Uhr"
