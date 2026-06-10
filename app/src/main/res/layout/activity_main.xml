@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="32dp"
+    android:paddingTop="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:gravity="center"
+            android:text="" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:gravity="center"
+            android:text="Turnier Timer"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <!-- Startzeit -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Startzeit des ersten Spiels:" />
+
+        <Button
+            android:id="@+id/btnStartzeit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="⏰ Uhrzeit wählen" />
+
+        <!-- Zeitslot -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Länge eines Zeitslots (Spiel + Pause) in Minuten:" />
+
+        <EditText
+            android:id="@+id/etZeitslot"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="z.B. 15"
+            android:inputType="number"
+            android:text="30" />
+
+        <!-- End-Jingle nach X Minuten -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="End-Jingle spielen nach wie vielen Minuten?" />
+
+        <EditText
+            android:id="@+id/etEndMinuten"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="z.B. 12"
+            android:inputType="number"
+            android:text="25" />
+
+        <!-- Start-Jingle -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Start-Jingle (vom Handy):" />
+
+        <Button
+            android:id="@+id/btnStartJingle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎵 Start-Jingle auswählen" />
+
+        <!-- End-Jingle -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="End-Jingle (vom Handy):" />
+
+        <Button
+            android:id="@+id/btnEndJingle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎵 End-Jingle auswählen" />
+
+        <!-- Test Buttons -->
+        <Button
+            android:id="@+id/btnTestStartJingle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#2196F3"
+            android:text="▶ Start-Jingle testen"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/btnTestEndJingle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#2196F3"
+            android:text="▶ End-Jingle testen"
+            android:textColor="#FFFFFF" />
+
+        <!-- Media Lautstärke -->
+        <TextView
+            android:id="@+id/textViewLautstaerke"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lautstärke Media: -- / --" />
+
+        <SeekBar
+            android:id="@+id/seekBarLautstaerke"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- End-Jingle Lautstärke -->
+        <TextView
+            android:id="@+id/textViewLautstaerkeEnd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lautstärke End-Jingle: -- / --" />
+
+        <SeekBar
+            android:id="@+id/seekBarLautstaerkeEnd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Start Button -->
+        <Button
+            android:id="@+id/btnStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#4CAF50"
+            android:text="▶ Timer starten"
+            android:textColor="#FFFFFF" />
+
+        <!-- Stop Button -->
+        <Button
+            android:id="@+id/btnStop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#F44336"
+            android:text="⏹ Timer stoppen"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/btnSpeichern"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="💾 Einstellungen speichern"
+            android:backgroundTint="#FF9800"
+            android:textColor="#FFFFFF"/>
+
+        <!-- Status -->
+        <TextView
+            android:id="@+id/tvStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="Status: Bereit"
+            android:textSize="16sp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:background="#CCCCCC" />
+
+        <TextView
+            android:id="@+id/tvSpielInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text=""
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tvNaechstesSpiel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text=""
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tvEndJingleInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text=""
+            android:textSize="15sp" />
+
+
+
+    </LinearLayout>
+</ScrollView>
