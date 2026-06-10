@@ -34,7 +34,11 @@ android {
 
 }
 
-(android.sourceSets.getByName("main").java as org.gradle.api.tasks.util.PatternFilterable).exclude("com/ultiorga/turniertimer/.claude/**")
+afterEvaluate {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        exclude("**/.claude/**")
+    }
+}
 
 androidComponents {
     onVariants { variant ->
