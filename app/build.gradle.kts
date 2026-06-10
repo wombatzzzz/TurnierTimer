@@ -34,14 +34,14 @@ android {
 
     sourceSets {
         getByName("main") {
-            java.exclude("**/.claude/**")
-            res.exclude("**/.claude/**")
+            java.excludes += "**/.claude/**"
+            res.excludes += "**/.claude/**"
         }
         getByName("androidTest") {
-            java.exclude("**/.claude/**")
+            java.excludes += "**/.claude/**"
         }
         getByName("test") {
-            java.exclude("**/.claude/**")
+            java.excludes += "**/.claude/**"
         }
     }
 }
