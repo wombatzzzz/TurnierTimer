@@ -54,6 +54,7 @@ class MainActivity : AppCompatActivity() {
         ladeVolEinstellungen()
         val timerLaeuft = getSharedPreferences("TimerServiceState", Context.MODE_PRIVATE)
             .getBoolean("S_LAEUFT", false)
+        aktualisiereEinstellungenButton(timerLaeuft)
         if (timerLaeuft) {
             val prefs = getSharedPreferences(stringPrefName, Context.MODE_PRIVATE)
             val intHour = prefs.getInt("PREF_HOUR_START", -1)
@@ -66,6 +67,15 @@ class MainActivity : AppCompatActivity() {
         startService(Intent(this, TimerService::class.java).apply {
             action = TimerService.ACTION_STATUS_ANFRAGEN
         })
+    }
+
+    private fun aktualisiereEinstellungenButton(timerLaeuft: Boolean) {
+        val btn = findViewById<Button>(R.id.btnEinstellungen)
+        btn.isEnabled = !timerLaeuft
+        btn.backgroundTintList = android.content.res.ColorStateList.valueOf(
+            if (timerLaeuft) android.graphics.Color.parseColor("#AAAAAA")
+            else android.graphics.Color.parseColor("#607D8B")
+        )
     }
 
     override fun onDestroy() {
@@ -174,16 +184,20 @@ class MainActivity : AppCompatActivity() {
                     Toast.makeText(this, "Bitte Letzte-x-Minuten-Jingle in den Einstellungen auswählen!", Toast.LENGTH_SHORT).show()
                 stringUriSchluss.isNullOrEmpty() ->
                     Toast.makeText(this, "Bitte Schluss-Jingle in den Einstellungen auswählen!", Toast.LENGTH_SHORT).show()
-                else -> starteService(
-                    intHourStart, intMinStart,
-                    intMinZeitSlot, intMinLetzteMin, intMinSchluss,
-                    stringUriStart!!, stringUriEnd!!, stringUriSchluss!!
-                )
+                else -> {
+                    aktualisiereEinstellungenButton(true)
+                    starteService(
+                        intHourStart, intMinStart,
+                        intMinZeitSlot, intMinLetzteMin, intMinSchluss,
+                        stringUriStart!!, stringUriEnd!!, stringUriSchluss!!
+                    )
+                }
             }
         }
 
         findViewById<Button>(R.id.btnStop).setOnClickListener {
             stopService(Intent(this, TimerService::class.java))
+            aktualisiereEinstellungenButton(false)
             findViewById<TextView>(R.id.tvStatus).text = "⏹ Timer gestoppt"
             findViewById<TextView>(R.id.tvSpielInfo).text = ""
             findViewById<TextView>(R.id.tvNaechstesSpiel).text = ""

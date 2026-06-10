@@ -107,6 +107,7 @@ class EinstellungenActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        ladeEinstellungen()
         val timerLaeuft = getSharedPreferences("TimerServiceState", Context.MODE_PRIVATE)
             .getBoolean("S_LAEUFT", false)
         setTestButtonsEnabled(!timerLaeuft)
