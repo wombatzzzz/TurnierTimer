@@ -37,11 +37,11 @@ class TimerService : Service() {
         /** Extra: Lautstärke als Float zwischen 0.0 und 1.0 */
         const val EXTRA_LAUTSTAERKE_WERT = "floatVolLautstaerke_wert"
 
-        /** Intent-Action zum Live-Aktualisieren der Letzte-x-Minuten-Jingle-Lautstärke */
-        const val ACTION_LAUTSTAERKE_LETZTE_MIN = "com.ultiorga.turniertimer.ACTION_LAUTSTAERKE_LETZTE_MIN"
+        /** Intent-Action zum Live-Aktualisieren der Jingle-Lautstärke (alle drei Jingles) */
+        const val ACTION_LAUTSTAERKE_JINGLE = "com.ultiorga.turniertimer.ACTION_LAUTSTAERKE_JINGLE"
 
-        /** Extra: Letzte-x-Minuten-Jingle-Lautstärke als Float zwischen 0.0 und 1.0 */
-        const val EXTRA_LAUTSTAERKE_LETZTE_MIN_WERT = "floatVolLetzteMinJingle_wert"
+        /** Extra: Jingle-Lautstärke als Float zwischen 0.0 und 1.0 */
+        const val EXTRA_LAUTSTAERKE_JINGLE_WERT = "floatVolJingle_wert"
 
         /** Intent-Action zum Testen eines Jingles über den Service (BT-kompatibel) */
         const val ACTION_TEST_JINGLE = "com.ultiorga.turniertimer.ACTION_TEST_JINGLE"
@@ -57,12 +57,6 @@ class TimerService : Service() {
 
         /** Intent-Action: MainActivity fordert sofortigen Status-Update vom Service an */
         const val ACTION_STATUS_ANFRAGEN = "com.ultiorga.turniertimer.ACTION_STATUS_ANFRAGEN"
-
-        /** Intent-Action zum Live-Aktualisieren der Schluss-Jingle-Lautstärke */
-        const val ACTION_LAUTSTAERKE_SCHLUSS = "com.ultiorga.turniertimer.ACTION_LAUTSTAERKE_SCHLUSS"
-
-        /** Extra: Schluss-Jingle-Lautstärke als Float zwischen 0.0 und 1.0 */
-        const val EXTRA_LAUTSTAERKE_SCHLUSS_WERT = "floatVolSchlussJingle_wert"
 
         /** Extra: Uhrzeit des Schluss-Jingles als Text */
         const val EXTRA_SCHLUSS_JINGLE = "schluss_jingle_info"
@@ -105,11 +99,8 @@ class TimerService : Service() {
     /** Lautstärke des Start-Jingles zwischen 0.0 und 1.0 */
     private var floatVolStartJingle: Float = 0.8f
 
-    /** Lautstärke des Letzte-x-Minuten-Jingles zwischen 0.0 und 1.0 (separat regelbar) */
-    private var floatVolLetzteMinJingle: Float = 0.8f
-
-    /** Lautstärke des Schluss-Jingles zwischen 0.0 und 1.0 (separat regelbar) */
-    private var floatVolSchlussJingle: Float = 0.8f
+    /** Software-Gain für alle drei Jingles zwischen 0.0 und 1.0 */
+    private var floatVolJingle: Float = 0.8f
 
     /** Zeitpunkt des Schluss-Jingles innerhalb eines Slots in Millisekunden */
     private var longMsSchluss: Long = 0
@@ -141,9 +132,8 @@ class TimerService : Service() {
             val startJingle  = prefs.getString("S_START_JINGLE",  null) ?: return START_NOT_STICKY
             val letzteMinJingle    = prefs.getString("S_END_JINGLE",    null) ?: return START_NOT_STICKY
             val schlussJingle = prefs.getString("S_SCHLUSS_JINGLE", null) ?: return START_NOT_STICKY
-            floatVolStartJingle  = prefs.getFloat("S_VOL_START",  0.8f)
-            floatVolLetzteMinJingle    = prefs.getFloat("S_VOL_END",    0.8f)
-            floatVolSchlussJingle = prefs.getFloat("S_VOL_SCHLUSS", 0.8f)
+            floatVolStartJingle = prefs.getFloat("S_VOL_START", 0.8f)
+            floatVolJingle      = prefs.getFloat("S_VOL_JINGLE", 0.8f)
             startForeground(NOTIF_ID, erstelleNotification("⏳ Timer läuft – warte auf Startzeit..."))
             planenAlle(
                 prefs.getInt("S_HOUR", 0), prefs.getInt("S_MIN", 0),
@@ -168,26 +158,17 @@ class TimerService : Service() {
             return START_STICKY
         }
 
-        // Sonderfall: Letzte-x-Minuten-Jingle Lautstärke aktualisieren
-        if (intent.action == ACTION_LAUTSTAERKE_LETZTE_MIN) {
-            floatVolLetzteMinJingle = intent.getFloatExtra(EXTRA_LAUTSTAERKE_LETZTE_MIN_WERT, 0.8f)
-            return START_STICKY
-        }
-
-        // Sonderfall: Schluss-Jingle Lautstärke aktualisieren
-        if (intent.action == ACTION_LAUTSTAERKE_SCHLUSS) {
-            floatVolSchlussJingle = intent.getFloatExtra(EXTRA_LAUTSTAERKE_SCHLUSS_WERT, 0.8f)
+        // Sonderfall: Jingle-Lautstärke aktualisieren (gilt für alle drei Jingles)
+        if (intent.action == ACTION_LAUTSTAERKE_JINGLE) {
+            floatVolJingle = intent.getFloatExtra(EXTRA_LAUTSTAERKE_JINGLE_WERT, 0.8f)
+            mediaPlayerJingle?.setVolume(floatVolJingle, floatVolJingle)
             return START_STICKY
         }
 
         // Sonderfall: Test-Jingle über Service abspielen (BT-kompatibel, gleicher Code-Pfad)
         if (intent.action == ACTION_TEST_JINGLE) {
             val jingleTyp = intent.getStringExtra("JINGLE_TYP") ?: "START"
-            val vol = when (jingleTyp) {
-                "END" -> floatVolLetzteMinJingle
-                "SCHLUSS" -> floatVolSchlussJingle
-                else -> floatVolStartJingle
-            }
+            val vol = if (jingleTyp == "START") floatVolStartJingle else floatVolJingle
             val uriString = intent.getStringExtra(EXTRA_TEST_JINGLE_URI) ?: return START_STICKY
 
             if (mediaPlayerJingle?.isPlaying == true) {
@@ -219,8 +200,7 @@ class TimerService : Service() {
         val letzteMinJingle = intent.getStringExtra("LETZTE_MIN_JINGLE") ?: return START_NOT_STICKY
         val schlussJingle = intent.getStringExtra("SCHLUSS_JINGLE") ?: return START_NOT_STICKY
         floatVolStartJingle = intent.getFloatExtra("LAUTSTAERKE", 0.8f)
-        floatVolLetzteMinJingle = intent.getFloatExtra("LAUTSTAERKE_LETZTE_MIN", 0.8f)
-        floatVolSchlussJingle = intent.getFloatExtra("LAUTSTAERKE_SCHLUSS", 0.8f)
+        floatVolJingle = intent.getFloatExtra("LAUTSTAERKE_JINGLE", 0.8f)
 
         speichereServiceParams(intHourStart, intMinStart, intMinZeitSlot, letzteMinMinuten, schlussMinuten, startJingle, letzteMinJingle, schlussJingle)
 
@@ -255,8 +235,7 @@ class TimerService : Service() {
                 putString("S_END_JINGLE", letzteMinJingle)
                 putString("S_SCHLUSS_JINGLE", schlussJingle)
                 putFloat("S_VOL_START", floatVolStartJingle)
-                putFloat("S_VOL_END", floatVolLetzteMinJingle)
-                putFloat("S_VOL_SCHLUSS", floatVolSchlussJingle)
+                putFloat("S_VOL_JINGLE", floatVolJingle)
                 putBoolean("S_LAEUFT", true)
                 apply()
             }
@@ -392,7 +371,7 @@ class TimerService : Service() {
                         stringSchlussJingleInfo = "🏁 Schluss-Jingle um $schlussJingleUhrzeit Uhr"
                     )
 
-                    jingleSpielen(Uri.parse(letzteMinJingle), volumeFactor = floatVolLetzteMinJingle)
+                    jingleSpielen(Uri.parse(letzteMinJingle), volumeFactor = floatVolJingle)
                 }
             }, naechsterEndZeit.time, longMsZeitslot)
 
@@ -419,7 +398,7 @@ class TimerService : Service() {
                         stringSchlussJingleInfo = ""
                     )
 
-                    jingleSpielen(Uri.parse(schlussJingle), volumeFactor = floatVolSchlussJingle)
+                    jingleSpielen(Uri.parse(schlussJingle), volumeFactor = floatVolJingle)
                 }
             }, naechsterSchlussZeit.time, longMsZeitslot)
         }

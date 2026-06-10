@@ -44,11 +44,8 @@ class MainActivity : AppCompatActivity() {
     /** Aktuelle Start-Jingle Lautstärke als Wert zwischen 0.0 und 1.0 */
     private var floatVolLautstaerke: Float = 0.8f
 
-    /** Separate Letzte-x-Minuten-Jingle Lautstärke als Wert zwischen 0.0 und 1.0 */
-    private var floatVolLetzteMinJingle: Float = 0.8f
-
-    /** Separate Schluss-Jingle Lautstärke als Wert zwischen 0.0 und 1.0 */
-    private var floatVolSchlussJingle: Float = 0.8f
+    /** Software-Gain für alle drei Jingles als Wert zwischen 0.0 und 1.0 */
+    private var floatVolJingle: Float = 0.8f
 
     /** SharedPreferences Schlüssel für persistente Einstellungen */
     private val stringPrefName = "TurnierTimerPrefs"
@@ -243,8 +240,7 @@ class MainActivity : AppCompatActivity() {
         prefsEditor.putString("PREF_URI_END_JINGLE", uriLetzteMinJingle?.toString() ?: "")
         prefsEditor.putString("PREF_URI_SCHLUSS_JINGLE", uriSchlussJingle?.toString() ?: "")
         prefsEditor.putFloat("PREF_VOL", floatVolLautstaerke)
-        prefsEditor.putFloat("PREF_VOL_END", floatVolLetzteMinJingle)
-        prefsEditor.putFloat("PREF_VOL_SCHLUSS", floatVolSchlussJingle)
+        prefsEditor.putFloat("PREF_VOL_JINGLE", floatVolJingle)
         prefsEditor.apply()
         Toast.makeText(this, "✅ Einstellungen gespeichert!", Toast.LENGTH_SHORT).show()
     }
@@ -307,21 +303,14 @@ class MainActivity : AppCompatActivity() {
         val intVolAkt = (floatVolGespeichert * intVolMax).toInt()
         audioManagerSystem.setStreamVolume(AudioManager.STREAM_MUSIC, intVolAkt, 0)
         findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerke).progress = intVolAkt
-        findViewById<TextView>(R.id.textViewLautstaerke).text = "Lautstärke Start-Jingle: $intVolAkt / $intVolMax"
+        findViewById<TextView>(R.id.textViewLautstaerke).text = "Medien Lautstärke: $intVolAkt / $intVolMax"
 
-        // Letzte-x-Minuten-Jingle Lautstärke laden
-        val floatVolEndGespeichert = prefs.getFloat("PREF_VOL_END", 0.8f)
-        floatVolLetzteMinJingle = floatVolEndGespeichert
-        val intVolEndAkt = (floatVolEndGespeichert * intVolMax).toInt()
-        findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerkeLetzteMin).progress = intVolEndAkt
-        findViewById<TextView>(R.id.textViewLautstaerkeLetzteMin).text = "Lautstärke Letzte-x-Minuten-Jingle: $intVolEndAkt / $intVolMax"
-
-        // Schluss-Jingle Lautstärke laden
-        val floatVolSchlussGespeichert = prefs.getFloat("PREF_VOL_SCHLUSS", 0.8f)
-        floatVolSchlussJingle = floatVolSchlussGespeichert
-        val intVolSchlussAkt = (floatVolSchlussGespeichert * intVolMax).toInt()
-        findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerkeSchluss).progress = intVolSchlussAkt
-        findViewById<TextView>(R.id.textViewLautstaerkeSchluss).text = "Lautstärke Schluss-Jingle: $intVolSchlussAkt / $intVolMax"
+        // Jingle Lautstärke laden
+        val floatVolJingleGespeichert = prefs.getFloat("PREF_VOL_JINGLE", 0.8f)
+        floatVolJingle = floatVolJingleGespeichert
+        val intVolJingleAkt = (floatVolJingleGespeichert * intVolMax).toInt()
+        findViewById<android.widget.SeekBar>(R.id.seekBarJingleLautstaerke).progress = intVolJingleAkt
+        findViewById<TextView>(R.id.textViewJingleLautstaerke).text = "Jingle Lautstärke: $intVolJingleAkt / $intVolMax"
     }
 
     /**
@@ -410,28 +399,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Richtet beide Lautstärke-Regler ein (Start-Jingle und Letzte-x-Minuten-Jingle).
-     * Der Start-Regler steuert auch den System-Stream-Pegel.
-     * Der End-Regler steuert nur den Software-Gain des Letzte-x-Minuten-Jingle-Players.
-     */
     private fun setupLautstaerkeRegler() {
         val audioManagerSystem = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val intVolMax = audioManagerSystem.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
 
-        // ── Start-Jingle Slider ──────────────────────────────────────────────────
-        val seekBarStart = findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerke)
+        // ── Medien Lautstärke (System-Stream) ───────────────────────────────────
+        val seekBarMedia = findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerke)
         val tvLautstaerke = findViewById<TextView>(R.id.textViewLautstaerke)
         val intVolAkt = audioManagerSystem.getStreamVolume(AudioManager.STREAM_MUSIC)
 
-        seekBarStart.max = intVolMax
-        seekBarStart.progress = intVolAkt
-        tvLautstaerke.text = "Lautstärke Start-Jingle: $intVolAkt / $intVolMax"
+        seekBarMedia.max = intVolMax
+        seekBarMedia.progress = intVolAkt
+        tvLautstaerke.text = "Medien Lautstärke: $intVolAkt / $intVolMax"
 
-        seekBarStart.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+        seekBarMedia.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, intProgress: Int, boolFromUser: Boolean) {
                 audioManagerSystem.setStreamVolume(AudioManager.STREAM_MUSIC, intProgress, 0)
-                tvLautstaerke.text = "Lautstärke Start-Jingle: $intProgress / $intVolMax"
+                tvLautstaerke.text = "Medien Lautstärke: $intProgress / $intVolMax"
                 floatVolLautstaerke = intProgress / intVolMax.toFloat()
 
                 val intentLautstaerke = Intent(this@MainActivity, TimerService::class.java).apply {
@@ -444,49 +428,25 @@ class MainActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
         })
 
-        // ── Letzte-x-Minuten-Jingle Slider ────────────────────────────────────────────────────
-        val seekBarEnd = findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerkeLetzteMin)
-        val tvLautstaerkeEnd = findViewById<TextView>(R.id.textViewLautstaerkeLetzteMin)
-        val intVolEndAkt = (floatVolLetzteMinJingle * intVolMax).toInt()
+        // ── Jingle Lautstärke (Software-Gain für alle Jingles) ──────────────────
+        val seekBarJingle = findViewById<android.widget.SeekBar>(R.id.seekBarJingleLautstaerke)
+        val tvJingleLautstaerke = findViewById<TextView>(R.id.textViewJingleLautstaerke)
+        val intVolJingleAkt = (floatVolJingle * intVolMax).toInt()
 
-        seekBarEnd.max = intVolMax
-        seekBarEnd.progress = intVolEndAkt
-        tvLautstaerkeEnd.text = "Lautstärke Letzte-x-Minuten-Jingle: $intVolEndAkt / $intVolMax"
+        seekBarJingle.max = intVolMax
+        seekBarJingle.progress = intVolJingleAkt
+        tvJingleLautstaerke.text = "Jingle Lautstärke: $intVolJingleAkt / $intVolMax"
 
-        seekBarEnd.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+        seekBarJingle.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, intProgress: Int, boolFromUser: Boolean) {
-                tvLautstaerkeEnd.text = "Lautstärke Letzte-x-Minuten-Jingle: $intProgress / $intVolMax"
-                floatVolLetzteMinJingle = intProgress / intVolMax.toFloat()
+                tvJingleLautstaerke.text = "Jingle Lautstärke: $intProgress / $intVolMax"
+                floatVolJingle = intProgress / intVolMax.toFloat()
 
-                val intentEndVol = Intent(this@MainActivity, TimerService::class.java).apply {
-                    action = TimerService.ACTION_LAUTSTAERKE_LETZTE_MIN
-                    putExtra(TimerService.EXTRA_LAUTSTAERKE_LETZTE_MIN_WERT, floatVolLetzteMinJingle)
+                val intentJingleVol = Intent(this@MainActivity, TimerService::class.java).apply {
+                    action = TimerService.ACTION_LAUTSTAERKE_JINGLE
+                    putExtra(TimerService.EXTRA_LAUTSTAERKE_JINGLE_WERT, floatVolJingle)
                 }
-                startService(intentEndVol)
-            }
-            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
-        })
-
-        // ── Schluss-Jingle Slider ────────────────────────────────────────────────
-        val seekBarSchluss = findViewById<android.widget.SeekBar>(R.id.seekBarLautstaerkeSchluss)
-        val tvLautstaerkeSchluss = findViewById<TextView>(R.id.textViewLautstaerkeSchluss)
-        val intVolSchlussAkt = (floatVolSchlussJingle * intVolMax).toInt()
-
-        seekBarSchluss.max = intVolMax
-        seekBarSchluss.progress = intVolSchlussAkt
-        tvLautstaerkeSchluss.text = "Lautstärke Schluss-Jingle: $intVolSchlussAkt / $intVolMax"
-
-        seekBarSchluss.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: android.widget.SeekBar?, intProgress: Int, boolFromUser: Boolean) {
-                tvLautstaerkeSchluss.text = "Lautstärke Schluss-Jingle: $intProgress / $intVolMax"
-                floatVolSchlussJingle = intProgress / intVolMax.toFloat()
-
-                val intentSchlussVol = Intent(this@MainActivity, TimerService::class.java).apply {
-                    action = TimerService.ACTION_LAUTSTAERKE_SCHLUSS
-                    putExtra(TimerService.EXTRA_LAUTSTAERKE_SCHLUSS_WERT, floatVolSchlussJingle)
-                }
-                startService(intentSchlussVol)
+                startService(intentJingleVol)
             }
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
@@ -590,8 +550,7 @@ class MainActivity : AppCompatActivity() {
             putExtra("LETZTE_MIN_JINGLE", uriLetzteMinJingle.toString())
             putExtra("SCHLUSS_JINGLE", uriSchlussJingle.toString())
             putExtra("LAUTSTAERKE", floatVolLautstaerke)
-            putExtra("LAUTSTAERKE_LETZTE_MIN", floatVolLetzteMinJingle)
-            putExtra("LAUTSTAERKE_SCHLUSS", floatVolSchlussJingle)
+            putExtra("LAUTSTAERKE_JINGLE", floatVolJingle)
         }
         startForegroundService(intentService)
         setJingleButtonsEnabled(false)

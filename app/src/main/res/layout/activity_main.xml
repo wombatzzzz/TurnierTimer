@@ -142,39 +142,27 @@
             android:text="▶ Schluss-Jingle testen"
             android:textColor="#FFFFFF" />
 
-        <!-- Media Lautstärke -->
+        <!-- Medien Lautstärke -->
         <TextView
             android:id="@+id/textViewLautstaerke"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Lautstärke Media: -- / --" />
+            android:text="Medien Lautstärke: -- / --" />
 
         <SeekBar
             android:id="@+id/seekBarLautstaerke"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
-        <!-- Letzte-x-Minuten-Jingle Lautstärke -->
+        <!-- Jingle Lautstärke -->
         <TextView
-            android:id="@+id/textViewLautstaerkeLetzteMin"
+            android:id="@+id/textViewJingleLautstaerke"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Lautstärke Letzte-x-Minuten-Jingle: -- / --" />
+            android:text="Jingle Lautstärke: -- / --" />
 
         <SeekBar
-            android:id="@+id/seekBarLautstaerkeLetzteMin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <!-- Schluss-Jingle Lautstärke -->
-        <TextView
-            android:id="@+id/textViewLautstaerkeSchluss"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Lautstärke Schluss-Jingle: -- / --" />
-
-        <SeekBar
-            android:id="@+id/seekBarLautstaerkeSchluss"
+            android:id="@+id/seekBarJingleLautstaerke"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
