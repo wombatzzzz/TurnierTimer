@@ -32,21 +32,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    sourceSets {
-        getByName("main") {
-            java.exclude("**/.claude/**")
-            kotlin.exclude("**/.claude/**")
-        }
-        getByName("test") {
-            java.exclude("**/.claude/**")
-            kotlin.exclude("**/.claude/**")
-        }
-        getByName("androidTest") {
-            java.exclude("**/.claude/**")
-            kotlin.exclude("**/.claude/**")
-        }
-    }
-
 }
 
 dependencies {
