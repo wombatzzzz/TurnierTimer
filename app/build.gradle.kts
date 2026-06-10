@@ -34,14 +34,15 @@ android {
 
     sourceSets {
         getByName("main") {
-            java.excludes += "**/.claude/**"
-            res.excludes += "**/.claude/**"
-        }
-        getByName("androidTest") {
-            java.excludes += "**/.claude/**"
+            java.setSrcDirs(listOf(
+                project.fileTree("src/main/java") { exclude("**/.claude/**") }
+            ))
         }
         getByName("test") {
-            java.excludes += "**/.claude/**"
+            java.setSrcDirs(listOf("src/test/java"))
+        }
+        getByName("androidTest") {
+            java.setSrcDirs(listOf("src/androidTest/java"))
         }
     }
 }
