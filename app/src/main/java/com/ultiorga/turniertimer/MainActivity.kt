@@ -97,10 +97,10 @@ class MainActivity : AppCompatActivity() {
 
         val floatVolJingleGespeichert = prefs.getFloat("PREF_VOL_JINGLE", 0.8f)
         floatVolJingle = floatVolJingleGespeichert
-        val intVolJingleAkt = (floatVolJingleGespeichert * intVolMax).toInt()
-        findViewById<android.widget.SeekBar>(R.id.seekBarJingleLautstaerke).progress = intVolJingleAkt
+        val intProzentJingle = (floatVolJingleGespeichert * 100).toInt()
+        findViewById<android.widget.SeekBar>(R.id.seekBarJingleLautstaerke).progress = intProzentJingle
         findViewById<TextView>(R.id.textViewJingleLautstaerke).text =
-            "Jingle Lautstärke: $intVolJingleAkt / $intVolMax"
+            "Jingle Lautstärke: $intProzentJingle% von Medien Lautstärke"
     }
 
     private fun setupLautstaerkeRegler() {
@@ -129,11 +129,11 @@ class MainActivity : AppCompatActivity() {
 
         val seekBarJingle = findViewById<android.widget.SeekBar>(R.id.seekBarJingleLautstaerke)
         val tvJingleLautstaerke = findViewById<TextView>(R.id.textViewJingleLautstaerke)
-        seekBarJingle.max = intVolMax
+        seekBarJingle.max = 100
         seekBarJingle.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, intProgress: Int, boolFromUser: Boolean) {
-                tvJingleLautstaerke.text = "Jingle Lautstärke: $intProgress / $intVolMax"
-                floatVolJingle = intProgress / intVolMax.toFloat()
+                tvJingleLautstaerke.text = "Jingle Lautstärke: $intProgress% von Medien Lautstärke"
+                floatVolJingle = intProgress / 100f
                 startService(Intent(this@MainActivity, TimerService::class.java).apply {
                     action = TimerService.ACTION_LAUTSTAERKE_JINGLE
                     putExtra(TimerService.EXTRA_LAUTSTAERKE_JINGLE_WERT, floatVolJingle)
