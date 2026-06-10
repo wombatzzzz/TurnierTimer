@@ -31,6 +31,19 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    sourceSets {
+        getByName("main") {
+            java.exclude("**/.claude/**")
+            res.exclude("**/.claude/**")
+        }
+        getByName("androidTest") {
+            java.exclude("**/.claude/**")
+        }
+        getByName("test") {
+            java.exclude("**/.claude/**")
+        }
+    }
 }
 
 dependencies {
