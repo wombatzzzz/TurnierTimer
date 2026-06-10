@@ -32,17 +32,12 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    sourceSets {
-        getByName("main") {
-            java.setSrcDirs(listOf(
-                project.fileTree("src/main/java") { exclude("**/.claude/**") }
-            ))
-        }
-        getByName("test") {
-            java.setSrcDirs(listOf("src/test/java"))
-        }
-        getByName("androidTest") {
-            java.setSrcDirs(listOf("src/androidTest/java"))
+}
+
+afterEvaluate {
+    tasks.configureEach {
+        if (this is org.gradle.api.tasks.SourceTask) {
+            exclude { it.file.absolutePath.contains(".claude") }
         }
     }
 }
