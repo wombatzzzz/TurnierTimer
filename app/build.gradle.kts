@@ -34,9 +34,7 @@ android {
 
     sourceSets {
         getByName("main") {
-            java {
-                exclude("com/ultiorga/turniertimer/.claude/**")
-            }
+            java.exclude("com/ultiorga/turniertimer/.claude/**")
         }
     }
 
