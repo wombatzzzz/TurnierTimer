@@ -34,14 +34,6 @@ android {
 
 }
 
-afterEvaluate {
-    tasks.configureEach {
-        if (this is org.gradle.api.tasks.SourceTask) {
-            exclude { it.file.absolutePath.contains(".claude") }
-        }
-    }
-}
-
 dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.appcompat)
