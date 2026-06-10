@@ -14,132 +14,20 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:gravity="center"
-            android:text="" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
+            android:layout_marginBottom="24dp"
             android:gravity="center"
             android:text="Turnier Timer"
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <!-- Startzeit -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Startzeit des ersten Spiels:" />
-
+        <!-- Einstellungen -->
         <Button
-            android:id="@+id/btnStartzeit"
+            android:id="@+id/btnEinstellungen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="⏰ Uhrzeit wählen" />
-
-        <!-- Zeitslot -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Länge eines Zeitslots (Spiel + Pause) in Minuten:" />
-
-        <EditText
-            android:id="@+id/etZeitslot"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="z.B. 15"
-            android:inputType="number"
-            android:text="30" />
-
-        <!-- Letzte-x-Minuten-Jingle nach X Minuten -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Letzte-x-Minuten-Jingle spielen nach wie vielen Minuten?" />
-
-        <EditText
-            android:id="@+id/etLetzteMinMinuten"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="z.B. 12"
-            android:inputType="number"
-            android:text="25" />
-
-        <!-- Schluss-Jingle nach X Minuten -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Schluss-Jingle spielen nach wie vielen Minuten?" />
-
-        <EditText
-            android:id="@+id/etSchlussMinuten"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="z.B. 27"
-            android:inputType="number"
-            android:text="27" />
-
-        <!-- Start-Jingle -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Start-Jingle (vom Handy):" />
-
-        <Button
-            android:id="@+id/btnStartJingle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🎵 Start-Jingle auswählen" />
-
-        <!-- Letzte-x-Minuten-Jingle -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Letzte-x-Minuten-Jingle (vom Handy):" />
-
-        <Button
-            android:id="@+id/btnLetzteMinJingle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🎵 Letzte-x-Minuten-Jingle auswählen" />
-
-        <!-- Schluss-Jingle -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Schluss-Jingle (vom Handy):" />
-
-        <Button
-            android:id="@+id/btnSchlussJingle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="🎵 Schluss-Jingle auswählen" />
-
-        <!-- Test Buttons -->
-        <Button
-            android:id="@+id/btnTestStartJingle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#2196F3"
-            android:text="▶ Start-Jingle testen"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/btnTestLetzteMinJingle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#2196F3"
-            android:text="▶ Letzte-x-Minuten-Jingle testen"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/btnTestSchlussJingle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:backgroundTint="#2196F3"
-            android:text="▶ Schluss-Jingle testen"
+            android:layout_marginBottom="8dp"
+            android:backgroundTint="#607D8B"
+            android:text="⚙ Einstellungen"
             android:textColor="#FFFFFF" />
 
         <!-- Medien Lautstärke -->
@@ -147,6 +35,7 @@
             android:id="@+id/textViewLautstaerke"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
             android:text="Medien Lautstärke: -- / --" />
 
         <SeekBar
@@ -159,6 +48,7 @@
             android:id="@+id/textViewJingleLautstaerke"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:text="Jingle Lautstärke: -- / --" />
 
         <SeekBar
@@ -171,7 +61,7 @@
             android:id="@+id/btnStart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:backgroundTint="#4CAF50"
             android:text="▶ Timer starten"
             android:textColor="#FFFFFF" />
@@ -184,15 +74,6 @@
             android:backgroundTint="#F44336"
             android:text="⏹ Timer stoppen"
             android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/btnSpeichern"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="💾 Einstellungen speichern"
-            android:backgroundTint="#FF9800"
-            android:textColor="#FFFFFF"/>
 
         <!-- Status -->
         <TextView
@@ -245,8 +126,6 @@
             android:gravity="center"
             android:text=""
             android:textSize="15sp" />
-
-
 
     </LinearLayout>
 </ScrollView>
