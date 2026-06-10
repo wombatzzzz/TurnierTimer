@@ -338,7 +338,7 @@ class TimerService : Service() {
                     val schlussJingleMs2 = ersterStart.timeInMillis + (aktuellesSpiel - 1) * longMsZeitslot + longMsSchluss
                     val schlussJingleUhrzeit2 = kalenderZuUhrzeit(schlussJingleMs2)
 
-                    aktualisiereNotification("🟢 Spiel $aktuellesSpiel läuft – endet um $naechsteUhrzeit Uhr")
+                    aktualisiereNotification("🟢 Spiel $aktuellesSpiel läuft – nächster Jingle: $letzteMinJingleUhrzeit Uhr")
                     sendeUpdate(
                         stringSpielNr = "🟢 Spiel $aktuellesSpiel um $aktuellesUhrzeit Uhr gestartet!",
                         stringNaechstes = "🕐 Nächstes Spiel um $naechsteUhrzeit Uhr",
@@ -363,7 +363,7 @@ class TimerService : Service() {
                     val schlussJingleMs = ersterStart.timeInMillis + (aktuellesSpiel - 1) * longMsZeitslot + longMsSchluss
                     val schlussJingleUhrzeit = kalenderZuUhrzeit(schlussJingleMs)
 
-                    aktualisiereNotification("⏰ Spiel $aktuellesSpiel endet bald – nächstes startet um $naechsteUhrzeit Uhr")
+                    aktualisiereNotification("⏰ Spiel $aktuellesSpiel endet bald – nächster Jingle: $schlussJingleUhrzeit Uhr")
                     sendeUpdate(
                         stringSpielNr = "⏰ Spiel $aktuellesSpiel endet bald!",
                         stringNaechstes = "🕐 Nächstes Spiel um $naechsteUhrzeit Uhr",
@@ -447,10 +447,12 @@ class TimerService : Service() {
             // Aktuelle Spielnummer berechnen (mindestens 1)
             val aktuellesSpiel = maxOf(1, ((letzterStartMs - longMsErsterStart) / longMsZeitslot).toInt() + 1)
 
+            val naechsterJingleMs = listOf(anzeigenLetzteMinJingleMs, anzeigenSchlussJingleMs, naechsterStartMs)
+                .filter { it > jetztMs }.minOrNull() ?: naechsterStartMs
             val notifText = if (jetztMs < longMsErsterStart) {
                 "⏳ Spiel 1 startet um ${kalenderZuUhrzeit(longMsErsterStart)} Uhr"
             } else {
-                "🟢 Spiel $aktuellesSpiel läuft – endet um ${kalenderZuUhrzeit(naechsterStartMs)} Uhr"
+                "🟢 Spiel $aktuellesSpiel läuft – nächster Jingle: ${kalenderZuUhrzeit(naechsterJingleMs)} Uhr"
             }
             aktualisiereNotification(notifText)
 
