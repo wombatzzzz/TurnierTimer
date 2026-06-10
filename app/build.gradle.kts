@@ -36,6 +36,17 @@ android {
 
 (android.sourceSets.getByName("main").java as org.gradle.api.tasks.util.PatternFilterable).exclude("com/ultiorga/turniertimer/.claude/**")
 
+androidComponents {
+    onVariants { variant ->
+        project.tasks.register("copy${variant.name.replaceFirstChar { it.uppercase() }}ApkToFolder", Copy::class) {
+            dependsOn("assemble${variant.name.replaceFirstChar { it.uppercase() }}")
+            from(layout.buildDirectory.dir("outputs/apk/${variant.name}"))
+            into(rootProject.layout.projectDirectory.dir("apk"))
+            include("*.apk")
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.appcompat)
