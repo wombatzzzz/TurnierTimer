@@ -67,6 +67,20 @@
             android:inputType="number"
             android:text="25" />
 
+        <!-- Schluss-Jingle nach X Minuten -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Schluss-Jingle spielen nach wie vielen Minuten?" />
+
+        <EditText
+            android:id="@+id/etSchlussMinuten"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="z.B. 27"
+            android:inputType="number"
+            android:text="27" />
+
         <!-- Start-Jingle -->
         <TextView
             android:layout_width="wrap_content"
@@ -91,6 +105,18 @@
             android:layout_height="wrap_content"
             android:text="🎵 End-Jingle auswählen" />
 
+        <!-- Schluss-Jingle -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Schluss-Jingle (vom Handy):" />
+
+        <Button
+            android:id="@+id/btnSchlussJingle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎵 Schluss-Jingle auswählen" />
+
         <!-- Test Buttons -->
         <Button
             android:id="@+id/btnTestStartJingle"
@@ -106,6 +132,14 @@
             android:layout_height="wrap_content"
             android:backgroundTint="#2196F3"
             android:text="▶ End-Jingle testen"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/btnTestSchlussJingle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#2196F3"
+            android:text="▶ Schluss-Jingle testen"
             android:textColor="#FFFFFF" />
 
         <!-- Media Lautstärke -->
@@ -129,6 +163,18 @@
 
         <SeekBar
             android:id="@+id/seekBarLautstaerkeEnd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <!-- Schluss-Jingle Lautstärke -->
+        <TextView
+            android:id="@+id/textViewLautstaerkeSchluss"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lautstärke Schluss-Jingle: -- / --" />
+
+        <SeekBar
+            android:id="@+id/seekBarLautstaerkeSchluss"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -196,6 +242,15 @@
 
         <TextView
             android:id="@+id/tvEndJingleInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text=""
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/tvSchlussJingleInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"

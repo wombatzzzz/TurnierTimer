@@ -57,6 +57,15 @@ class TimerService : Service() {
 
         /** Intent-Action: MainActivity fordert sofortigen Status-Update vom Service an */
         const val ACTION_STATUS_ANFRAGEN = "com.ultiorga.turniertimer.ACTION_STATUS_ANFRAGEN"
+
+        /** Intent-Action zum Live-Aktualisieren der Schluss-Jingle-Lautstärke */
+        const val ACTION_LAUTSTAERKE_SCHLUSS = "com.ultiorga.turniertimer.ACTION_LAUTSTAERKE_SCHLUSS"
+
+        /** Extra: Schluss-Jingle-Lautstärke als Float zwischen 0.0 und 1.0 */
+        const val EXTRA_LAUTSTAERKE_SCHLUSS_WERT = "floatVolSchlussJingle_wert"
+
+        /** Extra: Uhrzeit des Schluss-Jingles als Text */
+        const val EXTRA_SCHLUSS_JINGLE = "schluss_jingle_info"
     }
 
     // ─── Notification ────────────────────────────────────────────────────────────
@@ -99,6 +108,12 @@ class TimerService : Service() {
     /** Lautstärke des End-Jingles zwischen 0.0 und 1.0 (separat regelbar) */
     private var floatVolEndJingle: Float = 0.8f
 
+    /** Lautstärke des Schluss-Jingles zwischen 0.0 und 1.0 (separat regelbar) */
+    private var floatVolSchlussJingle: Float = 0.8f
+
+    /** Zeitpunkt des Schluss-Jingles innerhalb eines Slots in Millisekunden */
+    private var longMsSchluss: Long = 0
+
     // ─── Lifecycle ───────────────────────────────────────────────────────────────
 
     /** Service hat keinen gebundenen Modus – nur als Foreground Service genutzt */
@@ -123,15 +138,18 @@ class TimerService : Service() {
         if (intent == null) {
             val prefs = getSharedPreferences("TimerServiceState", Context.MODE_PRIVATE)
             if (!prefs.getBoolean("S_LAEUFT", false)) return START_NOT_STICKY
-            val startJingle = prefs.getString("S_START_JINGLE", null) ?: return START_NOT_STICKY
-            val endJingle   = prefs.getString("S_END_JINGLE",   null) ?: return START_NOT_STICKY
-            floatVolStartJingle = prefs.getFloat("S_VOL_START", 0.8f)
-            floatVolEndJingle   = prefs.getFloat("S_VOL_END",   0.8f)
+            val startJingle  = prefs.getString("S_START_JINGLE",  null) ?: return START_NOT_STICKY
+            val endJingle    = prefs.getString("S_END_JINGLE",    null) ?: return START_NOT_STICKY
+            val schlussJingle = prefs.getString("S_SCHLUSS_JINGLE", null) ?: return START_NOT_STICKY
+            floatVolStartJingle  = prefs.getFloat("S_VOL_START",  0.8f)
+            floatVolEndJingle    = prefs.getFloat("S_VOL_END",    0.8f)
+            floatVolSchlussJingle = prefs.getFloat("S_VOL_SCHLUSS", 0.8f)
             startForeground(NOTIF_ID, erstelleNotification("⏳ Timer läuft – warte auf Startzeit..."))
             planenAlle(
                 prefs.getInt("S_HOUR", 0), prefs.getInt("S_MIN", 0),
                 prefs.getInt("S_SLOT", 15), prefs.getInt("S_END_MIN", 12),
-                startJingle, endJingle
+                prefs.getInt("S_SCHLUSS_MIN", 14),
+                startJingle, endJingle, schlussJingle
             )
             sendeInitialenStatus()
             return START_STICKY
@@ -156,10 +174,20 @@ class TimerService : Service() {
             return START_STICKY
         }
 
+        // Sonderfall: Schluss-Jingle Lautstärke aktualisieren
+        if (intent.action == ACTION_LAUTSTAERKE_SCHLUSS) {
+            floatVolSchlussJingle = intent.getFloatExtra(EXTRA_LAUTSTAERKE_SCHLUSS_WERT, 0.8f)
+            return START_STICKY
+        }
+
         // Sonderfall: Test-Jingle über Service abspielen (BT-kompatibel, gleicher Code-Pfad)
         if (intent.action == ACTION_TEST_JINGLE) {
-            val isStartJingle = intent.getBooleanExtra("IS_START_JINGLE", true)
-            val vol = if (isStartJingle) floatVolStartJingle else floatVolEndJingle
+            val jingleTyp = intent.getStringExtra("JINGLE_TYP") ?: "START"
+            val vol = when (jingleTyp) {
+                "END" -> floatVolEndJingle
+                "SCHLUSS" -> floatVolSchlussJingle
+                else -> floatVolStartJingle
+            }
             val uriString = intent.getStringExtra(EXTRA_TEST_JINGLE_URI) ?: return START_STICKY
 
             if (mediaPlayerJingle?.isPlaying == true) {
@@ -186,19 +214,19 @@ class TimerService : Service() {
         val intMinStart = intent.getIntExtra("START_MINUTE", 0)
         val intMinZeitSlot = intent.getIntExtra("ZEITSLOT", 15)
         val endMinuten = intent.getIntExtra("END_MINUTEN", 12)
+        val schlussMinuten = intent.getIntExtra("SCHLUSS_MINUTEN", 14)
         val startJingle = intent.getStringExtra("START_JINGLE") ?: return START_NOT_STICKY
         val endJingle = intent.getStringExtra("END_JINGLE") ?: return START_NOT_STICKY
+        val schlussJingle = intent.getStringExtra("SCHLUSS_JINGLE") ?: return START_NOT_STICKY
         floatVolStartJingle = intent.getFloatExtra("LAUTSTAERKE", 0.8f)
         floatVolEndJingle = intent.getFloatExtra("LAUTSTAERKE_END", 0.8f)
+        floatVolSchlussJingle = intent.getFloatExtra("LAUTSTAERKE_SCHLUSS", 0.8f)
 
-        // Parameter persistieren damit Android den Service nach einem Kill wiederherstellen kann
-        speichereServiceParams(intHourStart, intMinStart, intMinZeitSlot, endMinuten, startJingle, endJingle)
+        speichereServiceParams(intHourStart, intMinStart, intMinZeitSlot, endMinuten, schlussMinuten, startJingle, endJingle, schlussJingle)
 
-        // Foreground-Notification starten (Android-Pflicht für Hintergrund-Services)
         startForeground(NOTIF_ID, erstelleNotification("⏳ Timer läuft – warte auf Startzeit..."))
 
-        // Timer mit allen Parametern planen
-        planenAlle(intHourStart, intMinStart, intMinZeitSlot, endMinuten, startJingle, endJingle)
+        planenAlle(intHourStart, intMinStart, intMinZeitSlot, endMinuten, schlussMinuten, startJingle, endJingle, schlussJingle)
 
         // Sofortigen Status an die App senden (damit UI direkt nach Start befüllt ist)
         sendeInitialenStatus()
@@ -214,18 +242,21 @@ class TimerService : Service() {
          */
         private fun speichereServiceParams(
             intHourStart: Int, intMinStart: Int,
-            intMinZeitSlot: Int, endMinuten: Int,
-            startJingle: String, endJingle: String
+            intMinZeitSlot: Int, endMinuten: Int, schlussMinuten: Int,
+            startJingle: String, endJingle: String, schlussJingle: String
         ) {
             getSharedPreferences("TimerServiceState", Context.MODE_PRIVATE).edit().apply {
                 putInt("S_HOUR", intHourStart)
                 putInt("S_MIN", intMinStart)
                 putInt("S_SLOT", intMinZeitSlot)
                 putInt("S_END_MIN", endMinuten)
+                putInt("S_SCHLUSS_MIN", schlussMinuten)
                 putString("S_START_JINGLE", startJingle)
                 putString("S_END_JINGLE", endJingle)
+                putString("S_SCHLUSS_JINGLE", schlussJingle)
                 putFloat("S_VOL_START", floatVolStartJingle)
                 putFloat("S_VOL_END", floatVolEndJingle)
+                putFloat("S_VOL_SCHLUSS", floatVolSchlussJingle)
                 putBoolean("S_LAEUFT", true)
                 apply()
             }
@@ -263,14 +294,15 @@ class TimerService : Service() {
         @SuppressLint("DiscouragedApi")
         private fun planenAlle(
             intHourStart: Int, intMinStart: Int,
-            intMinZeitSlot: Int, endMinuten: Int,
-            startJingle: String, endJingle: String
+            intMinZeitSlot: Int, endMinuten: Int, schlussMinuten: Int,
+            startJingle: String, endJingle: String, schlussJingle: String
         ) {
             timerSpiele = Timer()
 
-            // Zeitslot und End-Jingle Offset in Millisekunden umrechnen
+            // Zeitslot und Jingle-Offsets in Millisekunden umrechnen
             longMsZeitslot = intMinZeitSlot * 60 * 1000L
             longMsEnd = endMinuten * 60 * 1000L
+            longMsSchluss = schlussMinuten * 60 * 1000L
 
             // Startzeit auf heute setzen (kein automatischer Sprung auf morgen)
             val ersterStart = Calendar.getInstance().apply {
@@ -324,11 +356,15 @@ class TimerService : Service() {
                     val endJingleMs = ersterStart.timeInMillis + (aktuellesSpiel - 1) * longMsZeitslot + longMsEnd
                     val endJingleUhrzeit = kalenderZuUhrzeit(endJingleMs)
 
-                    aktualisiereNotification("🎮 Spiel $aktuellesSpiel läuft. Nächste Jingle um $endJingleUhrzeit Uhr")
+                    val schlussJingleMs2 = ersterStart.timeInMillis + (aktuellesSpiel - 1) * longMsZeitslot + longMsSchluss
+                    val schlussJingleUhrzeit2 = kalenderZuUhrzeit(schlussJingleMs2)
+
+                    aktualisiereNotification("🎮 Spiel $aktuellesSpiel läuft. End-Jingle um $endJingleUhrzeit Uhr")
                     sendeUpdate(
                         stringSpielNr = "🎮 Spiel $aktuellesSpiel um $aktuellesUhrzeit Uhr gestartet!",
                         stringNaechstes = "🕐 Nächstes Spiel um $naechsteUhrzeit Uhr",
-                        stringEndJingleInfo = "⏰ End-Jingle um $endJingleUhrzeit Uhr"
+                        stringEndJingleInfo = "⏰ End-Jingle um $endJingleUhrzeit Uhr",
+                        stringSchlussJingleInfo = "🏁 Schluss-Jingle um $schlussJingleUhrzeit2 Uhr"
                     )
 
                     jingleSpielen(Uri.parse(startJingle), volumeFactor = floatVolStartJingle)
@@ -340,22 +376,52 @@ class TimerService : Service() {
             timerSpiele?.scheduleAtFixedRate(object : TimerTask() {
                 override fun run() {
                     val aktuellesSpiel = intSpielNummer
-                    val restMinuten = intMinZeitSlot - endMinuten
 
-                    // Nächsten Spielbeginn für die Anzeige berechnen
                     val naechsterMs = ersterStart.timeInMillis + aktuellesSpiel * longMsZeitslot
                     val naechsteUhrzeit = kalenderZuUhrzeit(naechsterMs)
 
-                    aktualisiereNotification("⏰ Nächste Spiel startet um $naechsteUhrzeit Uhr")
+                    // Schluss-Jingle Uhrzeit für diesen Slot
+                    val schlussJingleMs = ersterStart.timeInMillis + (aktuellesSpiel - 1) * longMsZeitslot + longMsSchluss
+                    val schlussJingleUhrzeit = kalenderZuUhrzeit(schlussJingleMs)
+
+                    aktualisiereNotification("⏰ Nächstes Spiel startet um $naechsteUhrzeit Uhr")
                     sendeUpdate(
                         stringSpielNr = "⏰ Spiel $aktuellesSpiel endet bald!",
                         stringNaechstes = "🕐 Nächstes Spiel um $naechsteUhrzeit Uhr",
-                        stringEndJingleInfo = "" //""⚡ Noch $restMinuten Min. bis zum nächsten Spiel"
+                        stringEndJingleInfo = "",
+                        stringSchlussJingleInfo = "🏁 Schluss-Jingle um $schlussJingleUhrzeit Uhr"
                     )
 
                     jingleSpielen(Uri.parse(endJingle), volumeFactor = floatVolEndJingle)
                 }
             }, naechsterEndZeit.time, longMsZeitslot)
+
+            // Schluss-Jingle: gleiche Periode, zwischen End- und Start-Jingle
+            val naechsterSchlussZeit = Calendar.getInstance().apply {
+                val schlussMs_aktuell = aktuellerSpielbeginnMs + longMsSchluss
+                timeInMillis = if (schlussMs_aktuell > jetzt.timeInMillis) schlussMs_aktuell
+                else aktuellerSpielbeginnMs + longMsZeitslot + longMsSchluss
+            }
+            Log.d("TurnierTimer", "Nächster Schluss-Jingle: ${naechsterSchlussZeit.time}")
+
+            timerSpiele?.scheduleAtFixedRate(object : TimerTask() {
+                override fun run() {
+                    val aktuellesSpiel = intSpielNummer
+
+                    val naechsterMs = ersterStart.timeInMillis + aktuellesSpiel * longMsZeitslot
+                    val naechsteUhrzeit = kalenderZuUhrzeit(naechsterMs)
+
+                    aktualisiereNotification("🏁 Spiel $aktuellesSpiel beendet! Nächstes um $naechsteUhrzeit Uhr")
+                    sendeUpdate(
+                        stringSpielNr = "🏁 Spiel $aktuellesSpiel ist beendet!",
+                        stringNaechstes = "🕐 Nächstes Spiel um $naechsteUhrzeit Uhr",
+                        stringEndJingleInfo = "",
+                        stringSchlussJingleInfo = ""
+                    )
+
+                    jingleSpielen(Uri.parse(schlussJingle), volumeFactor = floatVolSchlussJingle)
+                }
+            }, naechsterSchlussZeit.time, longMsZeitslot)
         }
 
         /**
@@ -382,9 +448,21 @@ class TimerService : Service() {
             }
 
             val anzeigenEndJingleMs = if (endJingleImAktuellenSpielMs > jetztMs) {
-                endJingleImAktuellenSpielMs // End-Jingle noch vor uns
+                endJingleImAktuellenSpielMs
             } else {
-                naechsterStartMs + longMsEnd   // End-Jingle bereits vorbei → nächstes Spiel
+                naechsterStartMs + longMsEnd
+            }
+
+            // Schluss-Jingle: ähnliche Logik wie End-Jingle
+            val schlussJingleImAktuellenSpielMs = if (jetztMs < longMsErsterStart) {
+                longMsErsterStart + longMsSchluss
+            } else {
+                letzterStartMs + longMsSchluss
+            }
+            val anzeigenSchlussJingleMs = if (schlussJingleImAktuellenSpielMs > jetztMs) {
+                schlussJingleImAktuellenSpielMs
+            } else {
+                naechsterStartMs + longMsSchluss
             }
 
             // Aktuelle Spielnummer berechnen (mindestens 1)
@@ -393,7 +471,8 @@ class TimerService : Service() {
             sendeUpdate(
                 stringSpielNr = "🎮 Aktuelles Spiel: $aktuellesSpiel",
                 stringNaechstes = "🕐 Nächster Start-Jingle: ${kalenderZuUhrzeit(naechsterStartMs)} Uhr",
-                stringEndJingleInfo = "⏰ End-Jingle um ${kalenderZuUhrzeit(anzeigenEndJingleMs)} Uhr"
+                stringEndJingleInfo = "⏰ End-Jingle um ${kalenderZuUhrzeit(anzeigenEndJingleMs)} Uhr",
+                stringSchlussJingleInfo = "🏁 Schluss-Jingle um ${kalenderZuUhrzeit(anzeigenSchlussJingleMs)} Uhr"
             )
         }
 
@@ -550,12 +629,18 @@ class TimerService : Service() {
          * @param stringNaechstes Text für die nächste Spielzeit
          * @param stringEndJingleInfo Text für die End-Jingle Uhrzeit
          */
-        private fun sendeUpdate(stringSpielNr: String, stringNaechstes: String, stringEndJingleInfo: String) {
+        private fun sendeUpdate(
+            stringSpielNr: String,
+            stringNaechstes: String,
+            stringEndJingleInfo: String,
+            stringSchlussJingleInfo: String = ""
+        ) {
             val intent = Intent(BROADCAST_ACTION).apply {
                 putExtra(EXTRA_SPIEL_NR, stringSpielNr)
                 putExtra(EXTRA_NAECHSTES, stringNaechstes)
                 putExtra(EXTRA_END_JINGLE, stringEndJingleInfo)
-                putExtra(EXTRA_TIMER_LAEUFT, longMsZeitslot > 0) // Timer aktiv?
+                putExtra(EXTRA_SCHLUSS_JINGLE, stringSchlussJingleInfo)
+                putExtra(EXTRA_TIMER_LAEUFT, longMsZeitslot > 0)
                 setPackage(packageName)
             }
             sendBroadcast(intent)
