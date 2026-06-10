@@ -42,6 +42,8 @@ class EinstellungenActivity : AppCompatActivity() {
             uriStartJingle = it
             val intSecDauer = getAudioDauer(it)
             findViewById<Button>(R.id.btnStartJingle).text = "✅ Start-Jingle gewählt (${intSecDauer}s)"
+            getSharedPreferences(stringPrefName, Context.MODE_PRIVATE).edit()
+                .putString("PREF_URI_START_JINGLE", it.toString()).apply()
         }
     }
 
@@ -65,6 +67,8 @@ class EinstellungenActivity : AppCompatActivity() {
                 uriLetzteMinJingle = it
                 findViewById<Button>(R.id.btnLetzteMinJingle).text =
                     "✅ Letzte-x-Minuten-Jingle gewählt (${intSecDauer}s)"
+                getSharedPreferences(stringPrefName, Context.MODE_PRIVATE).edit()
+                    .putString("PREF_URI_END_JINGLE", it.toString()).apply()
             }
         }
     }
@@ -89,6 +93,8 @@ class EinstellungenActivity : AppCompatActivity() {
                 uriSchlussJingle = it
                 findViewById<Button>(R.id.btnSchlussJingle).text =
                     "✅ Schluss-Jingle gewählt (${intSecDauer}s)"
+                getSharedPreferences(stringPrefName, Context.MODE_PRIVATE).edit()
+                    .putString("PREF_URI_SCHLUSS_JINGLE", it.toString()).apply()
             }
         }
     }
@@ -140,6 +146,10 @@ class EinstellungenActivity : AppCompatActivity() {
                     intMinStart = intMin
                     findViewById<Button>(R.id.btnStartzeit).text =
                         "⏰ %02d:%02d Uhr".format(intHour, intMin)
+                    getSharedPreferences(stringPrefName, Context.MODE_PRIVATE).edit()
+                        .putInt("PREF_HOUR_START", intHour)
+                        .putInt("PREF_MIN_START", intMin)
+                        .apply()
                 },
                 calJetzt.get(Calendar.HOUR_OF_DAY),
                 calJetzt.get(Calendar.MINUTE),
